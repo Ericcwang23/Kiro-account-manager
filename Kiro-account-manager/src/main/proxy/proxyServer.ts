@@ -1436,7 +1436,8 @@ export class ProxyServer {
             currentAccount = this.accountPool.getAccount(currentAccount.id) || currentAccount
             continue
           }
-          // 刷新失败 → 切到没试过的下个账号
+          // 刷新失败 → 标记 RECOVERABLE 错误触发断路器冷却，然后切到没试过的下个账号
+          this.accountPool.recordError(currentAccount.id, ErrorType.RECOVERABLE, 401)
           const nextAccount = switchToNextAccount()
           if (nextAccount && !triedIds.has(nextAccount.id)) {
             currentAccount = nextAccount
